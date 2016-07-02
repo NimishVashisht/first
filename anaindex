@@ -1,0 +1,61 @@
+
+
+<%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@page session="false" %>
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <title>JSP Page</title>
+    </head>
+    <body>
+    <center>
+        <div style="width:600px; box-shadow: 1px 1px 100px 1px; padding: 90px; padding-bottom: 300px;padding-top: 50px; margin-top: 120px">
+            <div style="float: left; width: 300px;">
+                <form action="login" method="post">
+                <table cellspacing="10px" cellpadding=10px style="font-size:16px; border-right: 5px solid">  
+                <tr>
+                    <th colspan="2">LOGIN</th>
+                </tr>
+                <tr>
+                    <td> Roll No. </td>
+                    <td><input type="text" name="rollno"></td>
+                </tr>
+                <tr>
+                    <td>Password</td>
+                    <td><input type="password" name="password"></td>
+                </tr>
+                <tr>
+                    <th colspan="2"><input type="submit" value="Login"></th>
+                </tr>
+                <tr>
+                    <th colspan="2" style="color: red;">
+                    <%
+                        System.out.println("qwerty");
+                        String var=request.getParameter("i");
+                        if(var!=null)
+                        {   
+                        %>              
+                        <%="Valid Login Required!"%>            
+                        <%}
+                        %> </th>
+                </tr>                
+                </table>
+                </form>
+            </div>           
+           
+            <div style="float: right; width: 300px;">
+                <form action="signup.jsp" >
+                <table cellspacing="10px" cellpadding=10px style="font-size:16px;">
+                <tr>
+                    <th>SIGNUP</th>
+                </tr>
+                <tr>
+                    <th ><input type="submit" value="Hurry!"></th>
+                </tr>   
+                </table>  
+                </form>
+            </div>              
+        </div>        
+    </body>
+</html>
