@@ -1,0 +1,243 @@
+
+<%@page import="java.sql.*"%>
+<%@page import="connection.Connect"%>
+<%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@page import="javax.servlet.RequestDispatcher" %>
+<%@page session="false" %>
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <title>Home</title>
+        <script>
+            function clear1()
+            {
+                document.getElementById("textf").value="";
+            }
+        </script>
+    </head>
+    <body>
+        <header>
+            <center>
+            <a href="home">Home</a>
+            <a href="profile.jsp">Profile</a>
+            </center>
+            <a href="logout" style="float: right">Logout</a>           
+        </header>
+        <%
+            String var= null,varid=null,varrl=null;
+           
+            HttpSession ref = request.getSession(false);
+            if(ref!=null)
+            {
+                var=(String)ref.getAttribute("fn");
+                varid=(String)ref.getAttribute("id");
+                varrl=(String)ref.getAttribute("rl");
+            }
+            else
+            {
+                response.sendRedirect("index.jsp?i=i");
+            }            
+            
+            var = var.substring(0, 1).toUpperCase() + var.substring(1);
+            String[] arr = (String[])request.getAttribute("fs"); 
+            if(arr!=null)
+            {%>
+                <label>Friend Requests: </label>
+                <%
+            for (int i =0; i < arr.length; i++)
+            {
+            System.out.println(arr[i]);
+                %>
+                <table>
+                    <tr><td>
+                    
+                <a href="profile.jsp?idfr=<%=arr[i]%>">friend</a> &nbsp;    
+                        </td>
+                <td>
+                <form action="respondf" method="post">
+                <input type="text" hidden="true" value="<%=varid%>" name="own">
+                <input type="text" hidden="true" value="<%=arr[i]%>" name="friend">
+                <input type="text" hidden="true" value="accept2" name="responsefr">
+                <input type="submit" value="Accept Friend Request">
+                </form></td><td>
+                <form action="respondf" method="post">
+                <input type="text" hidden="true" value="<%=varid%>" name="own">
+                <input type="text" hidden="true" value="<%=arr[i]%>" name="friend">
+                <input type="text" hidden="true" value="reject2" name="responsefr">
+                <input type="submit" value="Reject">
+                </form></td></tr>
+                </table>
+                <%
+            }     }
+            else{}            
+         %>
+        <center>
+        <h1>Hello <%=var%></h1>
+        </center>
+        <form action="profile">
+            <input type="search" placeholder="Enter rollno. to find" name="search">
+            <input type="submit" value="search">
+        </form>
+    <center>
+        <div style="width:580px; box-shadow: 1px 1px 45px 1px; padding: 20px; padding-bottom: 40px;padding-top: 20px; margin-top: 10px">
+            <p>
+                <form action="postt" method="post">
+                    <textarea rows="4" cols="80" placeholder="Feel free to write!" style="resize: none; " id="textf" name="textp"></textarea>                    
+                    <tabel style="float: right;">
+                        <tr>
+                            <td><input type="button" value="Clear" onclick="(clear1());"/></td></tr>
+                        <tr>
+                            <td><input type="submit" value="POST"></td></tr>
+                    </table>                    
+                </form>                             
+            </p>
+        </div>
+        <div style="width:600px; box-shadow: 1px 1px 8px 1px; padding: 20px; padding-bottom: 30px;padding-top: 20px; margin-top: 10px">
+
+        <%
+            Connect c = new Connect();
+            Connection con=c.dbconnect();
+            Statement st;
+            ResultSet rs;
+            String postt;
+            int count=0;
+            
+            try
+            {
+                st=con.createStatement();
+                rs=st.executeQuery("select postt from postt where id='"+varid+"' order by time desc");
+                while(rs.next())
+                {
+                    count++;
+                }                
+            }
+            catch(Exception e)
+            {
+                System.out.println(e);
+            }
+            
+            String fids=null;
+            int counter=0;
+            try
+            {
+                st=con.createStatement();
+                rs=st.executeQuery("select friendsid from friends where id='"+varid+"'");
+                while(rs.next())
+                {
+                    fids=rs.getString("friendsid");
+                    counter++;
+                }
+                int count2=0;
+                if(counter!=0)
+                {
+                    String[] flist= fids.split(",");
+                    
+                    String query = "select postt from postt where id='"+varid+"'";
+                    String d="";
+                    for(int i=0; i<flist.length;i++)
+                    {
+                        d=d+" or id='"+flist[i]+"'";
+                    }
+                    query = query+d+" order by time desc";
+                    
+                    for(int i=0; i<flist.length;i++)
+                    {
+                        st=con.createStatement();
+                        rs=st.executeQuery("select postt from postt where id='"+flist[i]+"' order by time desc");
+                        while(rs.next())
+                        {
+                            count2++;
+                        }                      
+                    }
+                    String[] postlist= new String[count2+count];
+                    int k=0;
+                    
+                    st=con.createStatement();
+                    rs=st.executeQuery(query);
+                    while(rs.next())
+                    {
+                        String posts=rs.getString("postt");
+                        postlist[k]=posts;
+                        k++;
+                    }
+                    int countid=0;
+                    st=con.createStatement();
+                    rs=st.executeQuery("select id from signup");
+                    while(rs.next())
+                    {
+                        countid++;
+                    }
+                    
+                    int t=0;
+                    String[] idlist= new String[countid];
+                    String[] rllist= new String[countid];
+                    String[] namelist= new String[countid];
+                    for(int i=0;i<postlist.length; i++)
+                    {
+                        st=con.createStatement();
+                        rs=st.executeQuery("select id from postt where postt='"+postlist[i]+"'");
+                        while(rs.next())
+                        {
+                            String ids= rs.getString("id");
+                            idlist[t]=ids;
+                            t++;
+                        }
+                    }
+                    t=0;
+                    for(int i=0; i<idlist.length; i++)
+                    {
+                        st=con.createStatement();
+                        rs=st.executeQuery("select rollno, firstname from signup where id='"+idlist[i]+"'");
+                        while(rs.next())
+                        {
+                            String rls= rs.getString("rollno");
+                            rllist[t]= rls;
+                            String names= rs.getString("firstname");
+                            namelist[t] =names;
+                            t++;
+                        }
+                    }
+                    for(int i=0; i<namelist.length; i++)
+                    {
+                        namelist[i] = namelist[i].substring(0, 1).toUpperCase() + namelist[i].substring(1);
+                    }
+                    for(int j=0; j<postlist.length; j++)
+                    {               
+                    %>
+                    <table width="590" cellspacing="5px">
+                        <form action="like" method="post">
+                        <tr>
+                            <td width="10%" rowspan="4">
+                                <img src="images/<%=rllist[j]%>.jpg" height="73" width="70" alt="image is loading...">
+                            </td>
+                            <td><a href="profile.jsp?idf=<%=idlist[j]%>" style="text-decoration: none"><%=namelist[j]%></a><td>
+                        </tr>
+                        
+                        <tr>
+                            <td style="word-wrap: break-word"><%=postlist[j]%></td>                            
+                        </tr>
+                        
+                        <tr>
+                            <td>                  
+                                    <input type="submit" value="Like" />
+                                </form>
+                                <input type="button" value="Comment"/>
+                            </td>                            
+                        </tr>
+                        <tr>
+                            <td><br></td>
+                        </tr>
+                        
+                    </table>                       
+                  <%}
+                }                
+            }
+            catch(Exception e)
+            {
+                System.out.println(e);
+            }
+        %>
+        </div>               
+    </body>
+</html>
